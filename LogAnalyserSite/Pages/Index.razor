@@ -1,6 +1,13 @@
 ﻿@page "/"
 @using LogAnalyserSite.Data
 @using Microsoft.AspNetCore.Mvc.ApplicationModels
+@using Newtonsoft.Json
+@using System.Net
+@using System.Net.Sockets
+@using System.Text
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Type = LogAnalyserSite.Data.Type
 
 <PageTitle>Index</PageTitle>
 
@@ -26,8 +33,6 @@ Welcome to your new app.
 
         <InputCheckbox @bind-Value="_model.otherFilter" type="checkbox" class="btn-check" id="otherFilter" autocomplete="off"/>
         <label class="btn btn-outline-primary" for="otherFilter">Other</label>
-        
-        <button type="submit">Submit</button>
     </EditForm>
 </div>
 
@@ -35,7 +40,8 @@ Welcome to your new app.
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">Datetime</th>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
             <th scope="col">Type</th>
             <th scope="col">Message</th>
         </tr>
@@ -43,14 +49,15 @@ Welcome to your new app.
         <tbody>
         @foreach (LogLine logline in data)
         {
-            @if ((@logline.type == "DEBUG" && _model.debugFilter) ||
-                 (@logline.type == "INFO" && _model.infoFilter) ||
-                 (@logline.type == "WARN" && _model.warnFilter) ||
-                 (@logline.type == "ERROR" && _model.errorFilter) ||
-                 (@logline.type == "OTHER" && _model.otherFilter))
+            @if ((@logline.type == Type.DEBUG && _model.debugFilter) ||
+                 (@logline.type == Type.INFO && _model.infoFilter) ||
+                 (@logline.type == Type.WARN && _model.warnFilter) ||
+                 (@logline.type == Type.ERROR && _model.errorFilter) ||
+                 (@logline.type == Type.OTHER && _model.otherFilter))
             {
                 <tr>
-                    <td>@logline.dateAndTime</td>
+                    <td>@logline.date</td>
+                    <td>@logline.time</td>
                     <td>@logline.type</td>
                     <td>@logline.message</td>
                 </tr>
@@ -65,24 +72,23 @@ Welcome to your new app.
     FilterModel _model = new FilterModel();
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        
-        //log = File.ReadAllText("/Users/finn/Documents/DurHack2023/LogAnalyserSite/LogAnalyserSite/qrt_data_extraction_analysis_04-11-2023_161722.log");
         if(!firstRender) return base.OnAfterRenderAsync(firstRender);
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
-        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
+        TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 65432);
+        server.Start();
+        TcpClient client = server.AcceptTcpClient();
+        Console.WriteLine("A client connected.");
+        NetworkStream stream = client.GetStream();
+        while (true)
+        {
+            byte[] bytes = new byte[1024];
+            int bytesRead = stream.Read(bytes, 0, bytes.Length);
+            string data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
+            Console.WriteLine($"Received: {data}");
+            LogLine logLine = JsonConvert.DeserializeObject<LogLine>(data);
+            Console.WriteLine(logLine);
+            this.data.Add(logLine);
+            StateHasChanged();
+        }
         StateHasChanged();
         return base.OnAfterRenderAsync(firstRender);
     }
