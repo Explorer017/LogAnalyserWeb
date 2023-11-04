@@ -4,6 +4,7 @@ namespace LogAnalyserSite.Data {
         INFO,
         OTHER,
         ERROR,
-        WARN
+        WARN,
+        CRIT
     }
 }

@@ -7,6 +7,7 @@ public class FilterModel
     public bool warnFilter = true;
     public bool errorFilter = true;
     public bool otherFilter = true;
+    public bool critFilter = true;
 
     public FilterModel()
     {

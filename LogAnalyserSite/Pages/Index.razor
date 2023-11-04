@@ -53,7 +53,8 @@ Welcome to your new app.
                  (@logline.type == Type.INFO && _model.infoFilter) ||
                  (@logline.type == Type.WARN && _model.warnFilter) ||
                  (@logline.type == Type.ERROR && _model.errorFilter) ||
-                 (@logline.type == Type.OTHER && _model.otherFilter))
+                 (@logline.type == Type.OTHER && _model.otherFilter) ||
+                 (@logline.type == Type.CRIT && _model.critFilter))
             {
                 <tr>
                     <td>@logline.date</td>
