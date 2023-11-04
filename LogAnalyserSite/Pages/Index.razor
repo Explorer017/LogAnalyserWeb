@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using LogAnalyserSite.Data
+@using Microsoft.AspNetCore.Mvc.ApplicationModels
 
 <PageTitle>Index</PageTitle>
 
@@ -6,4 +8,89 @@
 
 Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<SurveyPrompt Title="How is Blazor working for you?"/>
+
+<div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+    <EditForm OnSubmit="@ChangeFilter" Model="@_model">
+        <InputCheckbox @bind-Value="_model.debugFilter" type="checkbox" class="btn-check" id="debugFilter" autocomplete="off"/>
+        <label class="btn btn-outline-primary" for="debugFilter">Debug</label>
+
+        <InputCheckbox @bind-Value="_model.infoFilter" type="checkbox" class="btn-check" id="infoFilter" autocomplete="off"/>
+        <label class="btn btn-outline-primary" for="infoFilter">Info</label>
+
+        <InputCheckbox @bind-Value="_model.warnFilter" type="checkbox" class="btn-check" id="warnFilter" autocomplete="off"/>
+        <label class="btn btn-outline-primary" for="warnFilter">Warn</label>
+
+        <InputCheckbox @bind-Value="_model.errorFilter" type="checkbox" class="btn-check" id="errorFilter" autocomplete="off"/>
+        <label class="btn btn-outline-primary" for="errorFilter">Error</label>
+
+        <InputCheckbox @bind-Value="_model.otherFilter" type="checkbox" class="btn-check" id="otherFilter" autocomplete="off"/>
+        <label class="btn btn-outline-primary" for="otherFilter">Other</label>
+        
+        <button type="submit">Submit</button>
+    </EditForm>
+</div>
+
+<div id="console" class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Datetime</th>
+            <th scope="col">Type</th>
+            <th scope="col">Message</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (LogLine logline in data)
+        {
+            @if ((@logline.type == "DEBUG" && _model.debugFilter) ||
+                 (@logline.type == "INFO" && _model.infoFilter) ||
+                 (@logline.type == "WARN" && _model.warnFilter) ||
+                 (@logline.type == "ERROR" && _model.errorFilter) ||
+                 (@logline.type == "OTHER" && _model.otherFilter))
+            {
+                <tr>
+                    <td>@logline.dateAndTime</td>
+                    <td>@logline.type</td>
+                    <td>@logline.message</td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
+
+@code{
+    List<LogLine> data = new List<LogLine>();
+    FilterModel _model = new FilterModel();
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        //log = File.ReadAllText("/Users/finn/Documents/DurHack2023/LogAnalyserSite/LogAnalyserSite/qrt_data_extraction_analysis_04-11-2023_161722.log");
+        if(!firstRender) return base.OnAfterRenderAsync(firstRender);
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "DEBUG", "Example debug"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "INFO", "Example info"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "WARN", "Example warning"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "ERROR", "Example error"));
+        data.Add(new LogLine("04-11-2023 12:52:26.449831000", "OTHER", "Example other"));
+        StateHasChanged();
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void ChangeFilter()
+    {
+        Console.WriteLine($"{_model.debugFilter} {_model.infoFilter} {_model.warnFilter} {_model.errorFilter} {_model.otherFilter}");
+        StateHasChanged();
+    }
+
+}

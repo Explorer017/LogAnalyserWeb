@@ -1,0 +1,11 @@
+#console{
+    overflow: scroll;
+    background-color: black;
+    color: white;
+    font-family: "JetBrains Mono", monospace;
+    height: 300px;
+}
+
+table{
+    color:white;
+}
