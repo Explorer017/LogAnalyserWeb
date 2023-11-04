@@ -70,24 +70,26 @@ Welcome to your new app.
 @code{
     List<LogLine> data = new List<LogLine>();
     FilterModel _model = new FilterModel();
+    TcpClient client;
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if(!firstRender) return base.OnAfterRenderAsync(firstRender);
-        TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 65432);
-        server.Start();
-        TcpClient client = server.AcceptTcpClient();
-        Console.WriteLine("A client connected.");
-        NetworkStream stream = client.GetStream();
-        while (true)
+        if (firstRender)
         {
+            TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 65432);
+            server.Start();
+            client = server.AcceptTcpClient();
+            Console.WriteLine("A client connected.");
+        }
+        else
+        {
+            NetworkStream stream = client.GetStream();
             byte[] bytes = new byte[1024];
             int bytesRead = stream.Read(bytes, 0, bytes.Length);
             string data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
             Console.WriteLine($"Received: {data}");
             LogLine logLine = JsonConvert.DeserializeObject<LogLine>(data);
-            Console.WriteLine(logLine);
+            //Console.WriteLine(logLine);
             this.data.Add(logLine);
-            StateHasChanged();
         }
         StateHasChanged();
         return base.OnAfterRenderAsync(firstRender);
