@@ -8,7 +8,7 @@
 @using Type = LogAnalyserSite.Data.Type
 @inject HttpClient httpClient
 
-<PageTitle>eeeeeeeeeee</PageTitle>
+<PageTitle>Log Analyser</PageTitle>
 
 <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
     <EditForm OnSubmit="@ChangeFilter" Model="@_model">
@@ -65,16 +65,20 @@
         </tbody>
     </table>
 </div>
-<button class="btn btn-primary" @onclick="@(async () => await httpClient.GetFromJsonAsync<string>("http://localhost:8000"))">Generate Logs</button>
-
+<!--<button class="btn btn-primary" @onclick="LoadLog">Generate Logs</button>-->
+<EditForm OnSubmit="@LoadLog" Model="@emptyModel">
+    <button type="submit">Generate Log</button>
+</EditForm>
 @code{
     List<LogLine> data = new List<LogLine>();
     FilterModel _model = new FilterModel();
     TcpClient client;
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    GenerateLogModel emptyModel = new GenerateLogModel();
+    protected override async Task<Task> OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            //await httpClient.PostAsJsonAsync("http://localhost:8000", "");
             TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 65432);
             server.Start();
             client = server.AcceptTcpClient();
@@ -101,4 +105,9 @@
         StateHasChanged();
     }
 
+    private async Task LoadLog()
+    {
+        Console.WriteLine("yes");
+        await httpClient.PostAsJsonAsync("http://localhost:8000", "");
+    }
 }
