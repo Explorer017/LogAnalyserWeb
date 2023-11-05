@@ -6,6 +6,7 @@
 @using System.Text
 @using System.Text.RegularExpressions
 @using Type = LogAnalyserSite.Data.Type
+@inject HttpClient httpClient
 
 <PageTitle>eeeeeeeeeee</PageTitle>
 
@@ -33,9 +34,6 @@
         <InputCheckbox @bind-Value="_model.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
         <label class="btn btn-outline-secondary" for="regex">Regex</label>
     </EditForm>
-    @* <EditForm  *@
-    @*      *@
-    @* </EditForm> *@
 </div>
 
 <div id="console" class="container">
@@ -50,13 +48,13 @@
         </thead>
         <tbody>
         @foreach (LogLine logline in data.Where(logline => ((@logline.type == Type.DEBUG && _model.debugFilter) ||
-                                                       (@logline.type == Type.INFO && _model.infoFilter) ||
-                                                       (@logline.type == Type.WARN && _model.warnFilter) ||
-                                                       (@logline.type == Type.ERROR && _model.errorFilter) ||
-                                                       (@logline.type == Type.OTHER && _model.otherFilter) ||
-                                                       (@logline.type == Type.CRIT && _model.critFilter)) &&
-                                                       (@logline.message.ToLower().Contains(_model.searchFilter.ToLower()) && !_model.regex) ||
-                                                       (Regex.IsMatch(@logline.message, _model.searchFilter) && _model.regex))) {
+                                                            (@logline.type == Type.INFO && _model.infoFilter) ||
+                                                            (@logline.type == Type.WARN && _model.warnFilter) ||
+                                                            (@logline.type == Type.ERROR && _model.errorFilter) ||
+                                                            (@logline.type == Type.OTHER && _model.otherFilter) ||
+                                                            (@logline.type == Type.CRIT && _model.critFilter)) &&
+                                                           (@logline.message.ToLower().Contains(_model.searchFilter.ToLower()) && !_model.regex) ||
+                                                           (Regex.IsMatch(@logline.message, _model.searchFilter) && _model.regex))) {
             <tr>
                 <td>@logline.date</td>
                 <td>@logline.time</td>
@@ -67,11 +65,11 @@
         </tbody>
     </table>
 </div>
+<button class="btn btn-primary" @onclick="@(async () => await httpClient.GetFromJsonAsync<string>("http://localhost:8000"))">Generate Logs</button>
 
 @code{
     List<LogLine> data = new List<LogLine>();
     FilterModel _model = new FilterModel();
-    SearchFilterModel _searchModel = new SearchFilterModel();
     TcpClient client;
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
