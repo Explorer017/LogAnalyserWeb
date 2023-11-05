@@ -29,10 +29,13 @@
         <InputCheckbox @bind-Value="_model.critFilter" type="checkbox" class="btn-check" id="critFilter" autocomplete="off"/>
         <label class="btn btn-outline-danger" for="critFilter">Critical</label>
         
-        <InputText @bind-Value="_searchModel.searchFilter" type="text" class="form-control" id="searchFilter" placeholder="Search"/>
-        <InputCheckbox @bind-Value="_searchModel.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
+        <InputText @bind-Value="_model.searchFilter" type="text" class="form-control" id="searchFilter" placeholder="Search"/>
+        <InputCheckbox @bind-Value="_model.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
         <label class="btn btn-outline-secondary" for="regex">Regex</label>
     </EditForm>
+    @* <EditForm  *@
+    @*      *@
+    @* </EditForm> *@
 </div>
 
 <div id="console" class="container">
@@ -52,8 +55,8 @@
                                                        (@logline.type == Type.ERROR && _model.errorFilter) ||
                                                        (@logline.type == Type.OTHER && _model.otherFilter) ||
                                                        (@logline.type == Type.CRIT && _model.critFilter)) &&
-                                                       (@logline.message.ToLower().Contains(_searchModel.searchFilter.ToLower()) && !_searchModel.regex) ||
-                                                       (Regex.IsMatch(@logline.message, _searchModel.searchFilter) && _searchModel.regex))) {
+                                                       (@logline.message.ToLower().Contains(_model.searchFilter.ToLower()) && !_model.regex) ||
+                                                       (Regex.IsMatch(@logline.message, _model.searchFilter) && _model.regex))) {
             <tr>
                 <td>@logline.date</td>
                 <td>@logline.time</td>
