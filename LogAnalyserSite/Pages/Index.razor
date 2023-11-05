@@ -6,7 +6,6 @@
 @using System.Text
 @using System.Text.RegularExpressions
 @using Type = LogAnalyserSite.Data.Type
-@inject HttpClient httpClient
 
 <PageTitle>Log Analyser</PageTitle>
 
@@ -65,10 +64,6 @@
         </tbody>
     </table>
 </div>
-<!--<button class="btn btn-primary" @onclick="LoadLog">Generate Logs</button>-->
-<EditForm OnSubmit="@LoadLog" Model="@emptyModel">
-    <button type="submit">Generate Log</button>
-</EditForm>
 @code{
     List<LogLine> data = new List<LogLine>();
     FilterModel _model = new FilterModel();
@@ -78,7 +73,6 @@
     {
         if (firstRender)
         {
-            //await httpClient.PostAsJsonAsync("http://localhost:8000", "");
             TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 65432);
             server.Start();
             client = server.AcceptTcpClient();
@@ -103,11 +97,5 @@
     private void ChangeFilter()
     {
         StateHasChanged();
-    }
-
-    private async Task LoadLog()
-    {
-        Console.WriteLine("yes");
-        await httpClient.PostAsJsonAsync("http://localhost:8000", "");
     }
 }
