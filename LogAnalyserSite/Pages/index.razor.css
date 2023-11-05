@@ -1,11 +1,11 @@
 #console{
     overflow: scroll;
     background-color: black;
-    color: white;
-    font-family: "JetBrains Mono", monospace;
-    height: 300px;
+    color: yellowgreen;
+    font-family: "Comic Sans MS", monospace;
+    height: 700px;
 }
 
 table{
-    color:white;
+    color:yellowgreen;
 }

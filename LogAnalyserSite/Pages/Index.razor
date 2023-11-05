@@ -1,21 +1,13 @@
 ﻿@page "/"
 @using LogAnalyserSite.Data
-@using Microsoft.AspNetCore.Mvc.ApplicationModels
 @using Newtonsoft.Json
 @using System.Net
 @using System.Net.Sockets
 @using System.Text
-@using System.Text.Json
-@using System.Text.Json.Serialization
+@using System.Text.RegularExpressions
 @using Type = LogAnalyserSite.Data.Type
 
-<PageTitle>Index</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?"/>
+<PageTitle>eeeeeeeeeee</PageTitle>
 
 <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
     <EditForm OnSubmit="@ChangeFilter" Model="@_model">
@@ -23,16 +15,23 @@ Welcome to your new app.
         <label class="btn btn-outline-primary" for="debugFilter">Debug</label>
 
         <InputCheckbox @bind-Value="_model.infoFilter" type="checkbox" class="btn-check" id="infoFilter" autocomplete="off"/>
-        <label class="btn btn-outline-primary" for="infoFilter">Info</label>
+        <label class="btn btn-outline-info" for="infoFilter">Info</label>
 
         <InputCheckbox @bind-Value="_model.warnFilter" type="checkbox" class="btn-check" id="warnFilter" autocomplete="off"/>
-        <label class="btn btn-outline-primary" for="warnFilter">Warn</label>
+        <label class="btn btn-outline-warning" for="warnFilter">Warning</label>
 
         <InputCheckbox @bind-Value="_model.errorFilter" type="checkbox" class="btn-check" id="errorFilter" autocomplete="off"/>
-        <label class="btn btn-outline-primary" for="errorFilter">Error</label>
+        <label class="btn btn-outline-danger" for="errorFilter">Error</label>
 
         <InputCheckbox @bind-Value="_model.otherFilter" type="checkbox" class="btn-check" id="otherFilter" autocomplete="off"/>
-        <label class="btn btn-outline-primary" for="otherFilter">Other</label>
+        <label class="btn btn-outline-secondary" for="otherFilter">Other</label>
+        
+        <InputCheckbox @bind-Value="_model.critFilter" type="checkbox" class="btn-check" id="critFilter" autocomplete="off"/>
+        <label class="btn btn-outline-danger" for="critFilter">Critical</label>
+        
+        <InputText @bind-Value="_model.searchFilter" type="text" class="form-control" id="searchFilter" placeholder="Search"/>
+        <InputCheckbox @bind-Value="_model.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
+        <label class="btn btn-outline-secondary" for="regex">Regex</label>
     </EditForm>
 </div>
 
@@ -47,22 +46,20 @@ Welcome to your new app.
         </tr>
         </thead>
         <tbody>
-        @foreach (LogLine logline in data)
-        {
-            @if ((@logline.type == Type.DEBUG && _model.debugFilter) ||
-                 (@logline.type == Type.INFO && _model.infoFilter) ||
-                 (@logline.type == Type.WARN && _model.warnFilter) ||
-                 (@logline.type == Type.ERROR && _model.errorFilter) ||
-                 (@logline.type == Type.OTHER && _model.otherFilter) ||
-                 (@logline.type == Type.CRIT && _model.critFilter))
-            {
-                <tr>
-                    <td>@logline.date</td>
-                    <td>@logline.time</td>
-                    <td>@logline.type</td>
-                    <td>@logline.message</td>
-                </tr>
-            }
+        @foreach (LogLine logline in data.Where(logline => (@logline.type == Type.DEBUG && _model.debugFilter) ||
+                                                       (@logline.type == Type.INFO && _model.infoFilter) ||
+                                                       (@logline.type == Type.WARN && _model.warnFilter) ||
+                                                       (@logline.type == Type.ERROR && _model.errorFilter) ||
+                                                       (@logline.type == Type.OTHER && _model.otherFilter) ||
+                                                       (@logline.type == Type.CRIT && _model.critFilter) ||
+                                                       (@logline.message.Contains(_model.searchFilter) && !_model.regex) ||
+                                                       (Regex.IsMatch(@logline.message, _model.searchFilter) && _model.regex))) {
+            <tr>
+                <td>@logline.date</td>
+                <td>@logline.time</td>
+                <td>@logline.type</td>
+                <td>@logline.message</td>
+            </tr>
         }
         </tbody>
     </table>
@@ -87,10 +84,11 @@ Welcome to your new app.
             byte[] bytes = new byte[1024];
             int bytesRead = stream.Read(bytes, 0, bytes.Length);
             string data = Encoding.ASCII.GetString(bytes, 0, bytesRead);
-            Console.WriteLine($"Received: {data}");
-            LogLine logLine = JsonConvert.DeserializeObject<LogLine>(data);
-            //Console.WriteLine(logLine);
-            this.data.Add(logLine);
+            if (data.Length > 0) {
+                Console.WriteLine($"Received: {data}");
+                LogLine logLine = JsonConvert.DeserializeObject<LogLine>(data);
+                this.data.Add(logLine);
+            }
         }
         StateHasChanged();
         return base.OnAfterRenderAsync(firstRender);
@@ -98,7 +96,6 @@ Welcome to your new app.
 
     private void ChangeFilter()
     {
-        Console.WriteLine($"{_model.debugFilter} {_model.infoFilter} {_model.warnFilter} {_model.errorFilter} {_model.otherFilter}");
         StateHasChanged();
     }
 
