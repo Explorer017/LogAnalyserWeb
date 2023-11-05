@@ -29,8 +29,8 @@
         <InputCheckbox @bind-Value="_model.critFilter" type="checkbox" class="btn-check" id="critFilter" autocomplete="off"/>
         <label class="btn btn-outline-danger" for="critFilter">Critical</label>
         
-        <InputText @bind-Value="_model.searchFilter" type="text" class="form-control" id="searchFilter" placeholder="Search"/>
-        <InputCheckbox @bind-Value="_model.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
+        <InputText @bind-Value="_searchModel.searchFilter" type="text" class="form-control" id="searchFilter" placeholder="Search"/>
+        <InputCheckbox @bind-Value="_searchModel.regex" type="checkbox" class="btn-check" id="regex" autocomplete="off"/>
         <label class="btn btn-outline-secondary" for="regex">Regex</label>
     </EditForm>
 </div>
@@ -46,14 +46,14 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (LogLine logline in data.Where(logline => (@logline.type == Type.DEBUG && _model.debugFilter) ||
+        @foreach (LogLine logline in data.Where(logline => ((@logline.type == Type.DEBUG && _model.debugFilter) ||
                                                        (@logline.type == Type.INFO && _model.infoFilter) ||
                                                        (@logline.type == Type.WARN && _model.warnFilter) ||
                                                        (@logline.type == Type.ERROR && _model.errorFilter) ||
                                                        (@logline.type == Type.OTHER && _model.otherFilter) ||
-                                                       (@logline.type == Type.CRIT && _model.critFilter) ||
-                                                       (@logline.message.Contains(_model.searchFilter) && !_model.regex) ||
-                                                       (Regex.IsMatch(@logline.message, _model.searchFilter) && _model.regex))) {
+                                                       (@logline.type == Type.CRIT && _model.critFilter)) &&
+                                                       (@logline.message.ToLower().Contains(_searchModel.searchFilter.ToLower()) && !_searchModel.regex) ||
+                                                       (Regex.IsMatch(@logline.message, _searchModel.searchFilter) && _searchModel.regex))) {
             <tr>
                 <td>@logline.date</td>
                 <td>@logline.time</td>
@@ -68,6 +68,7 @@
 @code{
     List<LogLine> data = new List<LogLine>();
     FilterModel _model = new FilterModel();
+    SearchFilterModel _searchModel = new SearchFilterModel();
     TcpClient client;
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

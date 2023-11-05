@@ -8,8 +8,6 @@ public class FilterModel
     public bool errorFilter = true;
     public bool otherFilter = true;
     public bool critFilter = true;
-    public string searchFilter = "";
-    public bool regex = false;
 
     public FilterModel()
     {
